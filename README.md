@@ -4,9 +4,9 @@ Train deep learning models on GPU, export to ONNX or native C/C++,
 deploy to Raspberry Pi, ESP32, and ARM microcontrollers 
 with zero-overhead inference.
 
-![Screenshot 0](images/1.png
-![Screenshot 0](images/2.png
-![Screenshot 0](images/3.png
+![Screenshot 0](images/1.png)
+![Screenshot 1](images/2.png)
+![Screenshot 2](images/3.png)
 
 ## 🎯 Quick Start
 
