@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NonlinearModel: Complete Guide</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 40px;
+        }
+        section {
+            margin-bottom: 50px;
+            padding-bottom: 40px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        section:last-child {
+            border-bottom: none;
+        }
+        h2 {
+            font-size: 1.8em;
+            color: #667eea;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        h3 {
+            font-size: 1.3em;
+            color: #764ba2;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        p {
+            margin-bottom: 15px;
+            font-size: 1em;
+            color: #555;
+        }
+        .code-block {
+            background: #f8f8f8;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            font-family: "Courier New", monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+        .highlight {
+            background: #fffacd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+        .box {
+            background: #f9f9f9;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .box-title {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .grid-item {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .grid-item h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .grid-item p {
+            font-size: 0.95em;
+            margin-bottom: 8px;
+        }
+        .step {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .step-content h4 {
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        .step-content p {
+            margin: 0;
+            font-size: 0.95em;
+        }
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .comparison-box {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .comparison-box h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .comparison-box ul {
+            margin-left: 20px;
+        }
+        .comparison-box li {
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+        svg {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px 0;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+        .key-point {
+            background: #e8f4f8;
+            border-left: 4px solid #764ba2;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .emoji {
+            font-size: 1.3em;
+            margin-right: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        table th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+        table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        @media (max-width: 768px) {
+            .grid-2, .comparison {
+                grid-template-columns: 1fr;
+            }
+            header h1 {
+                font-size: 1.8em;
+            }
+            h2 {
+                font-size: 1.4em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧠 NonlinearModel Complete Guide</h1>
+            <p>Understanding a 2→32→32→1 Neural Network for Signal Prediction</p>
+        </header>
+
+        <div class="content">
+            <!-- Section 1: Model Overview -->
+            <section>
+                <h2><span class="emoji">📐</span>The Model Structure</h2>
+                <p>The <span class="highlight">NonlinearModel</span> is a simple feedforward neural network with the following architecture:</p>
+                
+                <div class="code-block">
+                    <pre><code class="language-python">import torch
+import torch.nn as nn
+
+
+class NonlinearModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.fc1 = nn.Linear(2, 32)    # Input: 2 features → 32 neurons
+        self.fc2 = nn.Linear(32, 32)   # Hidden: 32 neurons → 32 neurons
+        self.fc3 = nn.Linear(32, 1)    # Output: 32 neurons → 1 prediction
+
+    def forward(self, x):
+        x = torch.relu(self.fc1(x))    # First layer + ReLU activation
+        x = torch.relu(self.fc2(x))    # Second layer + ReLU activation
+        return self.fc3(x)              # Output layer (no activation)</code></pre>
+                </div>
+
+                <h3>Layer Breakdown</h3>
+                <svg viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <polygon points="0 0, 10 3, 0 6" fill="#667eea" />
+                        </marker>
+                    </defs>
+                    
+                    <!-- Input -->
+                    <circle cx="60" cy="80" r="15" fill="#667eea" stroke="#333" stroke-width="1.5"/>
+                    <text x="60" y="85" text-anchor="middle" fill="white" font-weight="bold" font-size="12">x₁</text>
+                    <circle cx="60" cy="140" r="15" fill="#667eea" stroke="#333" stroke-width="1.5"/>
+                    <text x="60" y="145" text-anchor="middle" fill="white" font-weight="bold" font-size="12">x₂</text>
+                    <text x="60" y="200" text-anchor="middle" font-size="12" font-weight="600" fill="#333">Input (2D)</text>
+                    
+                    <!-- FC1 -->
+                    <line x1="85" y1="80" x2="130" y2="110" stroke="#667eea" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+                    <line x1="85" y1="140" x2="130" y2="110" stroke="#667eea" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+                    
+                    <rect x="130" y="60" width="80" height="100" rx="5" fill="#f0f0f0" stroke="#667eea" stroke-width="2"/>
+                    <text x="170" y="90" text-anchor="middle" font-size="13" font-weight="600" fill="#667eea">FC1</text>
+                    <text x="170" y="110" text-anchor="middle" font-size="11" fill="#666">Linear</text>
+                    <text x="170" y="125" text-anchor="middle" font-size="11" fill="#666">2 → 32</text>
+                    <text x="170" y="200" text-anchor="middle" font-size="12" font-weight="600" fill="#333">96 params</text>
+                    
+                    <!-- ReLU 1 -->
+                    <line x1="210" y1="110" x2="250" y2="110" stroke="#667eea" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+                    
+                    <rect x="250" y="60" width="80" height="100" rx="5" fill="#ffe8b6" stroke="#764ba2" stroke-width="2"/>
+                    <text x="290" y="95" text-anchor="middle" font-size="13" font-weight="600" fill="#764ba2">ReLU</text>
+                    <text x="290" y="125" text-anchor="middle" font-size="11" fill="#666">max(0, x)</text>
+                    <text x="290" y="200" text-anchor="middle" font-size="12" font-weight="600" fill="#333">No params</text>
+                    
+                    <!-- FC2 -->
+                    <line x1="330" y1="110" x2="375" y2="110" stroke="#667eea" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+                    
+                    <rect x="375" y="60" width="80" height="100" rx="5" fill="#f0f0f0" stroke="#667eea" stroke-width="2"/>
+                    <text x="415" y="90" text-anchor="middle" font-size="13" font-weight="600" fill="#667eea">FC2</text>
+                    <text x="415" y="110" text-anchor="middle" font-size="11" fill="#666">Linear</text>
+                    <text x="415" y="125" text-anchor="middle" font-size="11" fill="#666">32 → 32</text>
+                    <text x="415" y="200" text-anchor="middle" font-size="12" font-weight="600" fill="#333">1,056 params</text>
+                    
+                    <!-- ReLU 2 -->
+                    <line x1="455" y1="110" x2="495" y2="110" stroke="#667eea" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+                    
+                    <rect x="495" y="60" width="80" height="100" rx="5" fill="#ffe8b6" stroke="#764ba2" stroke-width="2"/>
+                    <text x="535" y="95" text-anchor="middle" font-size="13" font-weight="600" fill="#764ba2">ReLU</text>
+                    <text x="535" y="125" text-anchor="middle" font-size="11" fill="#666">max(0, x)</text>
+                    <text x="535" y="200" text-anchor="middle" font-size="12" font-weight="600" fill="#333">No params</text>
+                    
+                    <!-- FC3 -->
+                    <line x1="575" y1="110" x2="610" y2="110" stroke="#667eea" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+                    
+                    <rect x="610" y="80" width="70" height="60" rx="5" fill="#f0f0f0" stroke="#667eea" stroke-width="2"/>
+                    <text x="645" y="100" text-anchor="middle" font-size="13" font-weight="600" fill="#667eea">FC3</text>
+                    <text x="645" y="120" text-anchor="middle" font-size="10" fill="#666">32 → 1</text>
+                    <text x="645" y="200" text-anchor="middle" font-size="12" font-weight="600" fill="#333">33 params</text>
+                    
+                    <!-- Output -->
+                    <line x1="680" y1="110" x2="710" y2="110" stroke="#667eea" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+                </svg>
+
+                <table>
+                    <tr>
+                        <th>Layer</th>
+                        <th>Type</th>
+                        <th>Input</th>
+                        <th>Output</th>
+                        <th>Parameters</th>
+                        <th>Purpose</th>
+                    </tr>
+                    <tr>
+                        <td><strong>FC1</strong></td>
+                        <td>Linear</td>
+                        <td>2D</td>
+                        <td>32D</td>
+                        <td>96</td>
+                        <td>Expand input to learn features</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ReLU 1</strong></td>
+                        <td>Activation</td>
+                        <td>32D</td>
+                        <td>32D</td>
+                        <td>0</td>
+                        <td>Add nonlinearity, sparse features</td>
+                    </tr>
+                    <tr>
+                        <td><strong>FC2</strong></td>
+                        <td>Linear</td>
+                        <td>32D</td>
+                        <td>32D</td>
+                        <td>1,056</td>
+                        <td>Refine features, learn interactions</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ReLU 2</strong></td>
+                        <td>Activation</td>
+                        <td>32D</td>
+                        <td>32D</td>
+                        <td>0</td>
+                        <td>Add more nonlinearity</td>
+                    </tr>
+                    <tr>
+                        <td><strong>FC3</strong></td>
+                        <td>Linear</td>
+                        <td>32D</td>
+                        <td>1D</td>
+                        <td>33</td>
+                        <td>Collapse to single prediction</td>
+                    </tr>
+                </table>
+
+                <div class="key-point">
+                    <span class="emoji">⭐</span>
+                    <strong>Total Parameters: 1,185</strong> — All of these get trained to minimize prediction error.
+                </div>
+            </section>
+
+            <!-- Section 2: What is ReLU? -->
+            <section>
+                <h2><span class="emoji">⚡</span>Understanding ReLU Activation</h2>
+                <p>ReLU (Rectified Linear Unit) is an activation function that introduces <span class="highlight">nonlinearity</span>. Without it, stacking layers would just be multiple linear transformations, which collapse to a single linear operation.</p>
+
+                <h3>What ReLU Does</h3>
+                <p><strong>Formula:</strong> ReLU(x) = max(0, x)</p>
+                <ul style="margin-left: 20px;">
+                    <li><strong>If input ≤ 0:</strong> output is 0 (neuron "switches off")</li>
+                    <li><strong>If input > 0:</strong> output is the input unchanged (neuron "fires")</li>
+                </ul>
+
+                <svg viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Axes -->
+                    <line x1="50" y1="350" x2="650" y2="350" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <line x1="50" y1="350" x2="50" y2="50" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <text x="660" y="355" font-size="12">input (x)</text>
+                    <text x="40" y="40" font-size="12">output</text>
+                    
+                    <!-- Labels -->
+                    <text x="45" y="240" font-size="11" fill="#666">0</text>
+                    <text x="40" y="355" font-size="11" fill="#666">0</text>
+                    <text x="45" y="160" font-size="11" fill="#666">5</text>
+                    <text x="620" y="365" font-size="11" fill="#666">5</text>
+                    
+                    <!-- ReLU curve -->
+                    <line x1="50" y1="350" x2="350" y2="350" stroke="#667eea" stroke-width="3"/>
+                    <line x1="350" y1="350" x2="650" y2="50" stroke="#667eea" stroke-width="3"/>
+                    
+                    <!-- Grid -->
+                    <line x1="50" y1="250" x2="650" y2="250" stroke="#eee" stroke-width="1" stroke-dasharray="5,5"/>
+                    <line x1="350" y1="50" x2="350" y2="350" stroke="#eee" stroke-width="1" stroke-dasharray="5,5"/>
+                    
+                    <!-- Kink point -->
+                    <circle cx="350" cy="350" r="5" fill="#764ba2" stroke="#333" stroke-width="1.5"/>
+                    <text x="350" y="375" text-anchor="middle" font-size="11" fill="#764ba2" font-weight="600">Kink at (0, 0)</text>
+                    
+                    <!-- Examples -->
+                    <g>
+                        <circle cx="150" cy="320" r="3" fill="#667eea"/>
+                        <text x="160" y="330" font-size="10" fill="#666">x = -3, out = 0</text>
+                    </g>
+                    <g>
+                        <circle cx="500" cy="150" r="3" fill="#667eea"/>
+                        <text x="510" y="160" font-size="10" fill="#666">x = 5, out = 5</text>
+                    </g>
+                    
+                    <!-- Title -->
+                    <text x="350" y="30" text-anchor="middle" font-size="14" font-weight="600" fill="#333">ReLU: max(0, x)</text>
+                </svg>
+
+                <h3>Why ReLU Matters</h3>
+                <div class="grid-2">
+                    <div class="grid-item">
+                        <h4>🎯 Enables Learning</h4>
+                        <p>The kink at zero breaks linearity. This allows the network to learn curved, nonlinear relationships in data — essential for signal reconstruction.</p>
+                    </div>
+                    <div class="grid-item">
+                        <h4>⚡ Sparse Activation</h4>
+                        <p>Roughly half the neurons output zero. This sparsity is efficient and forces the network to learn selective, meaningful features.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: FC1 Layer in Detail -->
+            <section>
+                <h2><span class="emoji">🔄</span>FC1 Layer: 2 → 32 Expansion</h2>
+                <p>The first layer expands your 2D input signal into 32D feature space. Each of the 32 neurons is independent:</p>
+
+                <svg viewBox="0 0 700 350" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Input -->
+                    <circle cx="50" cy="100" r="12" fill="#667eea" stroke="#333" stroke-width="1.5"/>
+                    <text x="50" y="105" text-anchor="middle" fill="white" font-weight="bold" font-size="11">0.8</text>
+                    <text x="50" y="130" text-anchor="middle" font-size="10" font-weight="600">x₁</text>
+                    
+                    <circle cx="50" cy="170" r="12" fill="#667eea" stroke="#333" stroke-width="1.5"/>
+                    <text x="50" y="175" text-anchor="middle" fill="white" font-weight="bold" font-size="11">-0.3</text>
+                    <text x="50" y="195" text-anchor="middle" font-size="10" font-weight="600">x₂</text>
+                    
+                    <!-- Arrows to neurons -->
+                    <line x1="65" y1="100" x2="120" y2="80" stroke="#999" stroke-width="1"/>
+                    <line x1="65" y1="100" x2="120" y2="120" stroke="#999" stroke-width="1"/>
+                    <line x1="65" y1="170" x2="120" y2="80" stroke="#999" stroke-width="1"/>
+                    <line x1="65" y1="170" x2="120" y2="120" stroke="#999" stroke-width="1"/>
+                    
+                    <!-- Neurons -->
+                    <g id="neuron1">
+                        <circle cx="160" cy="60" r="20" fill="#f0f0f0" stroke="#667eea" stroke-width="2"/>
+                        <text x="160" y="65" text-anchor="middle" font-size="11" fill="#333" font-weight="600">N₁</text>
+                    </g>
+                    
+                    <circle cx="160" cy="130" r="20" fill="#f0f0f0" stroke="#667eea" stroke-width="2"/>
+                    <text x="160" y="135" text-anchor="middle" font-size="11" fill="#333" font-weight="600">N₂</text>
+                    
+                    <circle cx="160" cy="200" r="20" fill="#f0f0f0" stroke="#667eea" stroke-width="2"/>
+                    <text x="160" y="205" text-anchor="middle" font-size="11" fill="#333" font-weight="600">N₃</text>
+                    
+                    <text x="160" y="270" text-anchor="middle" font-size="10" fill="#666">⋮</text>
+                    
+                    <circle cx="160" cy="310" r="20" fill="#f0f0f0" stroke="#667eea" stroke-width="2"/>
+                    <text x="160" y="315" text-anchor="middle" font-size="11" fill="#333" font-weight="600">N₃₂</text>
+                    
+                    <!-- Right side: outputs -->
+                    <line x1="190" y1="60" x2="250" y2="60" stroke="#667eea" stroke-width="1.5"/>
+                    <line x1="190" y1="130" x2="250" y2="130" stroke="#667eea" stroke-width="1.5"/>
+                    <line x1="190" y1="200" x2="250" y2="200" stroke="#667eea" stroke-width="1.5"/>
+                    <line x1="190" y1="310" x2="250" y2="310" stroke="#667eea" stroke-width="1.5"/>
+                    
+                    <!-- Output values -->
+                    <rect x="250" y="45" width="60" height="30" rx="4" fill="#e8f4f8" stroke="#667eea" stroke-width="1.5"/>
+                    <text x="280" y="65" text-anchor="middle" font-size="12" font-weight="600" fill="#667eea">+0.65</text>
+                    
+                    <rect x="250" y="115" width="60" height="30" rx="4" fill="#e8f4f8" stroke="#667eea" stroke-width="1.5"/>
+                    <text x="280" y="135" text-anchor="middle" font-size="12" font-weight="600" fill="#667eea">+0.46</text>
+                    
+                    <rect x="250" y="185" width="60" height="30" rx="4" fill="#e8f4f8" stroke="#667eea" stroke-width="1.5"/>
+                    <text x="280" y="205" text-anchor="middle" font-size="12" font-weight="600" fill="#667eea">-0.18</text>
+                    
+                    <text x="280" y="265" text-anchor="middle" font-size="10" fill="#666">⋮</text>
+                    
+                    <rect x="250" y="295" width="60" height="30" rx="4" fill="#e8f4f8" stroke="#667eea" stroke-width="1.5"/>
+                    <text x="280" y="315" text-anchor="middle" font-size="12" font-weight="600" fill="#667eea">+1.04</text>
+                    
+                    <!-- Labels -->
+                    <text x="160" y="30" text-anchor="middle" font-size="12" font-weight="600" fill="#333">32 neurons</text>
+                    <text x="280" y="30" text-anchor="middle" font-size="12" font-weight="600" fill="#333">32 outputs</text>
+                    
+                    <!-- Formula box -->
+                    <rect x="350" y="80" width="330" height="150" rx="6" fill="#f9f9f9" stroke="#667eea" stroke-width="1.5"/>
+                    <text x="365" y="105" font-size="12" font-weight="600" fill="#667eea">For each neuron:</text>
+                    <text x="365" y="135" font-size="11" fill="#333">z = w₁·x₁ + w₂·x₂ + bias</text>
+                    <text x="365" y="165" font-size="11" fill="#333">Example (Neuron 1):</text>
+                    <text x="365" y="190" font-size="11" fill="#333">w = [+1.2, -0.4], bias = 0.3</text>
+                    <text x="365" y="210" font-size="11" fill="#333">z = (1.2)(0.8) + (-0.4)(-0.3) + 0.3 = 1.38</text>
+                    <text x="365" y="230" font-size="11" fill="#333" font-weight="600">ReLU → output = 1.38 ✓</text>
+                </svg>
+
+                <div class="box">
+                    <div class="box-title">💡 Key Insight</div>
+                    <p>Each neuron learns to <strong>detect a different pattern</strong> in your 2D signal. Neuron 1 might detect "positive peaks," Neuron 2 might detect "zero crossings," etc. Together, they create a 32D representation where different input patterns activate different neurons.</p>
+                </div>
+            </section>
+
+            <!-- Section 4: Training Cycle -->
+            <section>
+                <h2><span class="emoji">🎓</span>One Training Cycle (Simple View)</h2>
+                <p>Training teaches the model to predict accurately. Each cycle involves 5 simple steps:</p>
+
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Get a sample</h4>
+                        <p>Input: 2D signal point (e.g., [sin(t), cos(t)]) | Target: what output should be</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Predict (forward pass)</h4>
+                        <p>Push data through model: input → FC1 → ReLU → FC2 → ReLU → FC3 → prediction</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Measure error</h4>
+                        <p>Loss = (prediction - target)² | Shows how wrong the model is</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Backpropagation (find fault)</h4>
+                        <p>Model figures out: "which weights caused this error?" using chain rule</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h4>Update weights</h4>
+                        <p>Nudge each weight in the right direction: w_new = w - learning_rate × gradient</p>
+                    </div>
+                </div>
+
+                <h3>Visual: Prediction Gets Better</h3>
+                <svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Before -->
+                    <text x="180" y="30" text-anchor="middle" font-size="14" font-weight="600" fill="#333">BEFORE (Bad Prediction)</text>
+                    <rect x="40" y="50" width="280" height="150" rx="4" fill="#f9f9f9" stroke="#ddd" stroke-width="1.5"/>
+                    <line x1="50" y1="190" x2="310" y2="190" stroke="#ccc" stroke-width="1"/>
+                    <line x1="50" y1="60" x2="50" y2="190" stroke="#ccc" stroke-width="1"/>
+                    <polyline points="60,150 100,90 140,75 180,110 220,160 260,190 300,200" stroke="#667eea" stroke-width="2" fill="none"/>
+                    <polyline points="60,170 100,100 140,85 180,125 220,170 260,200 300,210" stroke="#764ba2" stroke-width="2" fill="none" stroke-dasharray="3,2"/>
+                    <text x="180" y="220" text-anchor="middle" font-size="10" fill="#666">Blue: prediction | Purple: target | Big gap = error</text>
+                    
+                    <!-- After -->
+                    <text x="540" y="30" text-anchor="middle" font-size="14" font-weight="600" fill="#333">AFTER (Good Prediction)</text>
+                    <rect x="380" y="50" width="280" height="150" rx="4" fill="#f9f9f9" stroke="#ddd" stroke-width="1.5"/>
+                    <line x1="390" y1="190" x2="650" y2="190" stroke="#ccc" stroke-width="1"/>
+                    <line x1="390" y1="60" x2="390" y2="190" stroke="#ccc" stroke-width="1"/>
+                    <polyline points="400,165 440,105 480,90 520,120 560,165 600,200 640,205" stroke="#667eea" stroke-width="2" fill="none"/>
+                    <polyline points="400,170 440,110 480,95 520,125 560,170 600,205 640,210" stroke="#764ba2" stroke-width="2" fill="none" stroke-dasharray="3,2"/>
+                    <text x="520" y="220" text-anchor="middle" font-size="10" fill="#666">Lines almost overlap = accurate prediction!</text>
+                    
+                    <!-- Arrow -->
+                    <text x="350" y="130" text-anchor="middle" font-size="20" fill="#667eea">→</text>
+                    <text x="350" y="155" text-anchor="middle" font-size="11" fill="#667eea" font-weight="600">Update</text>
+                    <text x="350" y="170" text-anchor="middle" font-size="11" fill="#667eea" font-weight="600">weights</text>
+                </svg>
+
+                <h3>Loss Over Time</h3>
+                <p>When you repeat this thousands of times:</p>
+                <svg viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Axes -->
+                    <line x1="80" y1="250" x2="650" y2="250" stroke="#333" stroke-width="2"/>
+                    <line x1="80" y1="250" x2="80" y2="50" stroke="#333" stroke-width="2"/>
+                    <text x="660" y="255" font-size="12" font-weight="600">Training steps</text>
+                    <text x="75" y="40" font-size="12" font-weight="600">Loss</text>
+                    
+                    <!-- Grid lines -->
+                    <line x1="80" y1="150" x2="650" y2="150" stroke="#eee" stroke-width="1" stroke-dasharray="5,5"/>
+                    
+                    <!-- Loss curve -->
+                    <polyline points="100,80 150,130 200,160 250,190 300,210 350,225 400,235 450,240 500,242 550,243 600,244 650,244" stroke="#667eea" stroke-width="3" fill="none"/>
+                    
+                    <!-- Labels -->
+                    <text x="75" y="255" font-size="11" fill="#666">0</text>
+                    <text x="75" y="155" font-size="11" fill="#666">0.5</text>
+                    <text x="75" y="55" font-size="11" fill="#666">1.0</text>
+                    
+                    <!-- Annotations -->
+                    <circle cx="100" cy="80" r="5" fill="#764ba2"/>
+                    <text x="110" y="75" font-size="10" fill="#764ba2" font-weight="600">Start (random)</text>
+                    <circle cx="650" cy="244" r="5" fill="#28a745"/>
+                    <text x="600" y="260" font-size="10" fill="#28a745" font-weight="600">Trained!</text>
+                    
+                    <text x="350" y="285" text-anchor="middle" font-size="11" fill="#666">Each step: small improvement in accuracy</text>
+                </svg>
+            </section>
+
+            <!-- Section 5: Inference -->
+            <section>
+                <h2><span class="emoji">🚀</span>Inference: Making Predictions</h2>
+                <p>Once the model is trained, <span class="highlight">inference</span> is just the forward pass — no training, no weight updates. The learned weights stay frozen.</p>
+
+                <h3>One Inference Cycle (5 Steps)</h3>
+                <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Input -->
+                    <rect x="20" y="60" width="70" height="70" rx="4" fill="#e8f4f8" stroke="#667eea" stroke-width="2"/>
+                    <text x="55" y="95" text-anchor="middle" font-size="12" font-weight="600" fill="#667eea">Input</text>
+                    <text x="55" y="115" text-anchor="middle" font-size="10" fill="#333">[0.5, 0.866]</text>
+                    
+                    <!-- Arrow 1 -->
+                    <line x1="95" y1="95" x2="110" y2="95" stroke="#999" stroke-width="2"/>
+                    <polygon points="110,95 105,92 105,98" fill="#999"/>
+                    <text x="102" y="85" text-anchor="middle" font-size="9" fill="#666">FC1</text>
+                    
+                    <!-- FC1 -->
+                    <rect x="110" y="60" width="70" height="70" rx="4" fill="#f0f0f0" stroke="#667eea" stroke-width="2"/>
+                    <text x="145" y="95" text-anchor="middle" font-size="12" font-weight="600" fill="#667eea">FC1</text>
+                    <text x="145" y="115" text-anchor="middle" font-size="9" fill="#333">32D</text>
+                    
+                    <!-- Arrow 2 -->
+                    <line x1="185" y1="95" x2="200" y2="95" stroke="#999" stroke-width="2"/>
+                    <polygon points="200,95 195,92 195,98" fill="#999"/>
+                    <text x="192" y="85" text-anchor="middle" font-size="9" fill="#666">ReLU</text>
+                    
+                    <!-- ReLU1 -->
+                    <rect x="200" y="60" width="70" height="70" rx="4" fill="#ffe8b6" stroke="#764ba2" stroke-width="2"/>
+                    <text x="235" y="100" text-anchor="middle" font-size="11" font-weight="600" fill="#764ba2">ReLU</text>
+                    
+                    <!-- Arrow 3 -->
+                    <line x1="275" y1="95" x2="290" y2="95" stroke="#999" stroke-width="2"/>
+                    <polygon points="290,95 285,92 285,98" fill="#999"/>
+                    <text x="282" y="85" text-anchor="middle" font-size="9" fill="#666">FC2</text>
+                    
+                    <!-- FC2 -->
+                    <rect x="290" y="60" width="70" height="70" rx="4" fill="#f0f0f0" stroke="#667eea" stroke-width="2"/>
+                    <text x="325" y="95" text-anchor="middle" font-size="12" font-weight="600" fill="#667eea">FC2</text>
+                    <text x="325" y="115" text-anchor="middle" font-size="9" fill="#333">32D</text>
+                    
+                    <!-- Arrow 4 -->
+                    <line x1="365" y1="95" x2="380" y2="95" stroke="#999" stroke-width="2"/>
+                    <polygon points="380,95 375,92 375,98" fill="#999"/>
+                    <text x="372" y="85" text-anchor="middle" font-size="9" fill="#666">ReLU</text>
+                    
+                    <!-- ReLU2 -->
+                    <rect x="380" y="60" width="70" height="70" rx="4" fill="#ffe8b6" stroke="#764ba2" stroke-width="2"/>
+                    <text x="415" y="100" text-anchor="middle" font-size="11" font-weight="600" fill="#764ba2">ReLU</text>
+                    
+                    <!-- Arrow 5 -->
+                    <line x1="455" y1="95" x2="470" y2="95" stroke="#999" stroke-width="2"/>
+                    <polygon points="470,95 465,92 465,98" fill="#999"/>
+                    <text x="462" y="85" text-anchor="middle" font-size="9" fill="#666">FC3</text>
+                    
+                    <!-- FC3 -->
+                    <rect x="470" y="60" width="70" height="70" rx="4" fill="#f0f0f0" stroke="#667eea" stroke-width="2"/>
+                    <text x="505" y="100" text-anchor="middle" font-size="11" font-weight="600" fill="#667eea">FC3</text>
+                    
+                    <!-- Arrow 6 -->
+                    <line x1="545" y1="95" x2="560" y2="95" stroke="#999" stroke-width="2"/>
+                    <polygon points="560,95 555,92 555,98" fill="#999"/>
+                    
+                    <!-- Output -->
+                    <rect x="560" y="70" width="70" height="50" rx="4" fill="#e8f4f8" stroke="#667eea" stroke-width="2"/>
+                    <text x="595" y="100" text-anchor="middle" font-size="13" font-weight="600" fill="#667eea">0.42</text>
+                    
+                    <!-- Data shapes -->
+                    <text x="55" y="150" text-anchor="middle" font-size="10" fill="#666">2D</text>
+                    <text x="145" y="150" text-anchor="middle" font-size="10" fill="#666">32D</text>
+                    <text x="235" y="150" text-anchor="middle" font-size="10" fill="#666">32D</text>
+                    <text x="325" y="150" text-anchor="middle" font-size="10" fill="#666">32D</text>
+                    <text x="415" y="150" text-anchor="middle" font-size="10" fill="#666">32D</text>
+                    <text x="505" y="150" text-anchor="middle" font-size="10" fill="#666">32D</text>
+                    <text x="595" y="150" text-anchor="middle" font-size="10" fill="#666">1D</text>
+                </svg>
+
+                <h3>What Happens</h3>
+                <p>Data flows left to right. Each layer transforms the data:</p>
+                <ul style="margin-left: 20px;">
+                    <li><strong>Input (2D):</strong> Raw signal point</li>
+                    <li><strong>FC1 (32D):</strong> Learned features from the signal</li>
+                    <li><strong>ReLU (32D):</strong> Some features activate, others zero out</li>
+                    <li><strong>FC2 (32D):</strong> Refined features, higher-order patterns</li>
+                    <li><strong>ReLU (32D):</strong> Sparsity again</li>
+                    <li><strong>FC3 (1D):</strong> Final prediction</li>
+                </ul>
+
+                <div class="key-point">
+                    <span class="emoji">✅</span>
+                    <strong>No weight updates happen during inference.</strong> The weights learned during training are frozen. Inference is purely computational — push data through, get answer.
+                </div>
+            </section>
+
+            <!-- Section 6: Comparison -->
+            <section>
+                <h2><span class="emoji">⚙️</span>Training vs Inference</h2>
+                <div class="comparison">
+                    <div class="comparison-box">
+                        <h4>🎓 Training</h4>
+                        <ul>
+                            <li><strong>Goal:</strong> Learn weights</li>
+                            <li><strong>Steps:</strong> Forward → Loss → Backward → Update</li>
+                            <li><strong>Frequency:</strong> Thousands of iterations</li>
+                            <li><strong>Weights:</strong> Change with each step</li>
+                            <li><strong>Gradients:</strong> Computed for every parameter</li>
+                            <li><strong>Speed:</strong> Slower (backprop is expensive)</li>
+                            <li><strong>Data:</strong> Training set (with known targets)</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-box">
+                        <h4>🚀 Inference</h4>
+                        <ul>
+                            <li><strong>Goal:</strong> Make predictions</li>
+                            <li><strong>Steps:</strong> Forward pass only</li>
+                            <li><strong>Frequency:</strong> Once per prediction</li>
+                            <li><strong>Weights:</strong> Frozen (never change)</li>
+                            <li><strong>Gradients:</strong> Not computed</li>
+                            <li><strong>Speed:</strong> Fast (just matrix multiplications)</li>
+                            <li><strong>Data:</strong> Test set (unknown targets)</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 7: Summary -->
+            <section>
+                <h2><span class="emoji">📌</span>Key Takeaways</h2>
+                
+                <div class="box">
+                    <div class="box-title">1️⃣ Architecture Pattern: Expand → Refine → Collapse</div>
+                    <p><strong>2D → 32D (FC1):</strong> Expand input to learn diverse features | <strong>32D → 32D (FC2):</strong> Refine features, learn interactions | <strong>32D → 1D (FC3):</strong> Collapse to final prediction</p>
+                </div>
+
+                <div class="box">
+                    <div class="box-title">2️⃣ ReLU Creates Nonlinearity</div>
+                    <p>Without ReLU, stacked linear layers collapse to a single linear transformation. ReLU's kink at zero breaks linearity, enabling the network to learn curved relationships.</p>
+                </div>
+
+                <div class="box">
+                    <div class="box-title">3️⃣ Training: Learn → Predict → Measure → Fix</div>
+                    <p>Thousands of cycles: predict (often wrong) → measure error → backprop to find which weights caused the error → nudge weights in better direction → error decreases</p>
+                </div>
+
+                <div class="box">
+                    <div class="box-title">4️⃣ Inference: Frozen Weights → Fast Predictions</div>
+                    <p>Once trained, weights never change. Inference is just forward pass: input data → matrix multiplications → output prediction. No gradients, no training overhead.</p>
+                </div>
+
+                <div class="box">
+                    <div class="box-title">5️⃣ Parameters & Learning</div>
+                    <p>1,185 weights all work together. Each learns a small piece of "how to predict this signal." After thousands of training samples, they collectively solve the prediction task.</p>
+                </div>
+            </section>
+
+            <!-- Section 8: Next Steps -->
+            <section>
+                <h2><span class="emoji">🎯</span>What to Try</h2>
+                <p>Now that you understand the model, you can experiment with:</p>
+                
+                <div class="grid-2">
+                    <div class="grid-item">
+                        <h4>📊 Visualize Predictions</h4>
+                        <p>Plot the model's predictions vs ground truth on a test signal. See how well it learned to approximate sinusoids.</p>
+                    </div>
+                    <div class="grid-item">
+                        <h4>🔧 Tune Hyperparameters</h4>
+                        <p>Try different learning rates, batch sizes, or number of epochs. See how they affect training speed and final accuracy.</p>
+                    </div>
+                    <div class="grid-item">
+                        <h4>🧪 Experiment with Architecture</h4>
+                        <p>Change layer sizes (e.g., 2→64→32→1). More neurons = more capacity but also more parameters to train.</p>
+                    </div>
+                    <div class="grid-item">
+                        <h4>📈 Track Loss</h4>
+                        <p>Plot loss over training iterations. You should see a steady decrease. Flat curves mean learning has stopped.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</body>
+</html>

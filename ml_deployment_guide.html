@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyTorch ML Training & Deployment Pipeline Guide</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f9f9f9;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 40px;
+            text-align: center;
+        }
+        h1 { font-size: 32px; margin-bottom: 8px; }
+        .subtitle { font-size: 16px; opacity: 0.95; }
+        
+        nav {
+            background: #f5f5f5;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1px;
+        }
+        nav a {
+            flex: 1;
+            padding: 12px 16px;
+            text-decoration: none;
+            color: #666;
+            font-weight: 500;
+            font-size: 13px;
+            border-right: 1px solid #e0e0e0;
+            transition: background 0.2s;
+            text-align: center;
+            min-width: 120px;
+        }
+        nav a:last-child { border-right: none; }
+        nav a:hover { background: #efefef; }
+        nav a.active { background: #667eea; color: white; }
+        
+        main {
+            padding: 40px;
+        }
+        
+        section {
+            margin-bottom: 48px;
+            display: none;
+        }
+        section.active { display: block; }
+        
+        h2 {
+            font-size: 24px;
+            margin-bottom: 16px;
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+        h3 {
+            font-size: 18px;
+            margin-top: 28px;
+            margin-bottom: 12px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        p {
+            margin-bottom: 16px;
+            line-height: 1.7;
+        }
+        
+        .phase-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 16px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .phase-box.path-a { border-left-color: #f97316; background: #fff7ed; }
+        .phase-box.path-b { border-left-color: #ec4899; background: #fce7f3; }
+        
+        code {
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            color: #d63384;
+        }
+        
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 16px 0;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+        pre code {
+            background: none;
+            border: none;
+            padding: 0;
+            color: inherit;
+        }
+        
+        .file-section {
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .file-header {
+            font-weight: 600;
+            font-size: 14px;
+            color: #667eea;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .comparison-table th {
+            background: #f5f5f5;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #e0e0e0;
+            font-size: 13px;
+        }
+        .comparison-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 13px;
+        }
+        .comparison-table tr:last-child td { border-bottom: none; }
+        .comparison-table tr:nth-child(even) { background: #fafafa; }
+        
+        ul, ol {
+            margin: 16px 0 16px 20px;
+        }
+        li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+        
+        .keyword {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .tip {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 12px 16px;
+            margin: 16px 0;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .warning {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 12px 16px;
+            margin: 16px 0;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        .workflow-step {
+            display: flex;
+            gap: 16px;
+            margin: 16px 0;
+            align-items: flex-start;
+        }
+        .workflow-step::before {
+            content: attr(data-step);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            font-weight: 600;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .workflow-step.alt::before { background: #f97316; }
+        .workflow-step.b::before { background: #ec4899; }
+        .workflow-step-content { flex: 1; }
+        .workflow-step-title { font-weight: 600; margin-bottom: 4px; }
+        .workflow-step-desc { font-size: 13px; color: #666; line-height: 1.5; }
+        
+        footer {
+            background: #f5f5f5;
+            border-top: 1px solid #e0e0e0;
+            padding: 20px 40px;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>PyTorch ML Training & Deployment</h1>
+            <p class="subtitle">Train on GPU → Export → Deploy to Raspberry Pi, ESP32, and microcontrollers</p>
+        </header>
+        
+        <nav>
+            <a href="#" onclick="switchTab('overview')" class="tab-btn active">Overview</a>
+            <a href="#" onclick="switchTab('file1')" class="tab-btn">File 1: Basics</a>
+            <a href="#" onclick="switchTab('file2')" class="tab-btn">File 2: Python</a>
+            <a href="#" onclick="switchTab('file3')" class="tab-btn">File 3: C/C++</a>
+            <a href="#" onclick="switchTab('comparison')" class="tab-btn">Comparison</a>
+            <a href="#" onclick="switchTab('deployment')" class="tab-btn">Deployment</a>
+        </nav>
+        
+        <main>
+            <!-- OVERVIEW -->
+            <section id="overview" class="active">
+                <h2>Project Overview</h2>
+                
+                <p>This project demonstrates a complete machine learning pipeline for embedded inference—training a model on a powerful GPU workstation (<strong>ai.local</strong>) and deploying it to resource-constrained hardware (Raspberry Pi, ESP32, ARM microcontrollers) via two independent paths: <strong>Python with ONNX Runtime</strong> or <strong>native C/C++ compiled code</strong>.</p>
+                
+                <h3>The workflow at a glance</h3>
+                <div class="phase-box">
+                    <strong>Phase 1 (Training):</strong> Build and train a nonlinear neural network on <code>ai.local</code> (RTX 3070 VRAM) using PyTorch. Fit the model to multidimensional input data with ReLU activations.
+                </div>
+                
+                <div class="phase-box">
+                    <strong>Phase 2 (Export):</strong> Save trained weights in two formats:<br/>
+                    • <strong>Path A:</strong> Export to ONNX format + normalization statistics for Python inference<br/>
+                    • <strong>Path B:</strong> Extract weights into C header files + generate native C/C++ inference code
+                </div>
+                
+                <div class="phase-box">
+                    <strong>Phase 3 (Deploy):</strong> Copy files to Pi via <code>sshpass</code> + SCP. Compile (if needed) and run inference directly on the target device.
+                </div>
+                
+                <div class="phase-box">
+                    <strong>Phase 4 (Execute):</strong> Run predictions on hardware with latency measured in microseconds. No deep learning frameworks required on the target.
+                </div>
+                
+                <h3>Why two paths?</h3>
+                <p><strong>Path A (Python ONNX):</strong> Flexible, portable, uses ONNX Runtime. Good for devices with Python + libonnxruntime (Linux, some microcontroller frameworks). Slightly higher overhead but easier debugging.</p>
+                <p><strong>Path B (C/C++):</strong> Zero-framework, compiled-in weights, minimal binary footprint, near-zero inference latency (~1 µs). Ideal for constrained environments (ESP32, bare-metal ARM).</p>
+                
+                <h3>Key technical decisions</h3>
+                <ul>
+                    <li><strong>Normalization:</strong> Input statistics (mean/std) are saved separately and applied before inference. This improves model training and generalization.</li>
+                    <li><strong>History/feedback loops:</strong> Files 2 and 3 demonstrate feeding model outputs back as inputs—useful for signal reconstruction and time-series tasks.</li>
+                    <li><strong>Auto-deployment:</strong> File 3 uses <code>subprocess.run</code> with <code>sshpass</code> to eliminate manual SSH steps. The Pi compiles and tests automatically.</li>
+                    <li><strong>Weight format:</strong> Weights are stored as plain C float arrays—no dynamic allocation, no serialization overhead.</li>
+                </ul>
+            </section>
+            
+            <!-- FILE 1 -->
+            <section id="file1">
+                <h2>File 1: <code>1pytorch.py</code> — Basic Training</h2>
+                
+                <p>This is the <strong>simplest file</strong>—a good starting point for learning PyTorch fundamentals. It trains a <strong>linear model</strong> (no hidden layers) on synthetic data.</p>
+                
+                <h3>What it does</h3>
+                <ol>
+                    <li>Checks if GPU is available and prints status</li>
+                    <li>Creates a synthetic CSV with inputs <code>x1, x2</code> and output <code>y = 2*x1 + 3*x2</code></li>
+                    <li>Loads the CSV into PyTorch tensors</li>
+                    <li>Defines a <code>SimpleModel</code> with a single <code>nn.Linear(2, 1)</code> layer</li>
+                    <li>Trains for 3000 epochs using SGD optimizer and MSE loss</li>
+                    <li>Saves the trained weights to <code>py_torch_model.pth</code></li>
+                    <li>Loads the checkpoint and tests predictions on new inputs</li>
+                </ol>
+                
+                <div class="file-section">
+                    <div class="file-header">Key components</div>
+                    <p><strong>Model architecture:</strong></p>
+                    <pre><code>class SimpleModel(nn.Module):
+    def __init__(self):
+        super(SimpleModel, self).__init__()
+        self.layer = nn.Linear(2, 1)
+    def forward(self, x):
+        return self.layer(x)</code></pre>
+                    
+                    <p><strong>Training loop:</strong></p>
+                    <pre><code>for epoch in range(num_epochs):
+    y_pred = model(x_train)
+    loss = loss_fn(y_pred, y_train)
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()</code></pre>
+                </div>
+                
+                <h3>What you learn</h3>
+                <ul>
+                    <li>How to structure a PyTorch model with <code>nn.Module</code></li>
+                    <li>How the forward pass, loss computation, and backward pass work</li>
+                    <li>How to save and load model state dicts</li>
+                    <li>The difference between training mode and evaluation mode</li>
+                </ul>
+                
+                <h3>Limitations</h3>
+                <p>This model can only fit <strong>linear relationships</strong>. The learned weights should converge to approximately <code>w1≈2, w2≈3</code>, matching the synthetic formula. This file does <strong>not export to ONNX or C/C++</strong>—it's purely for training demonstration.</p>
+                
+                <div class="tip">
+                    <strong>Tip:</strong> Modify the synthetic data (e.g., <code>output = 2*x1**2 + 3*x2</code>) to see how the linear model fails to fit nonlinear functions. This motivates the hidden layers in File 2.
+                </div>
+            </section>
+            
+            <!-- FILE 2 -->
+            <section id="file2">
+                <h2>File 2: <code>2pytorch_non_linear.py</code> — Full Python Pipeline</h2>
+                
+                <p>A <strong>complete self-contained workflow</strong> that trains a nonlinear model and deploys it to Raspberry Pi via <strong>ONNX Runtime</strong>. This is the <span class="keyword">Python deployment path</span>.</p>
+                
+                <h3>Architecture</h3>
+                <p>A 3-layer feedforward network with ReLU activations:</p>
+                <div class="file-section">
+                    <pre><code>class NonlinearModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.fc1 = nn.Linear(2, 32)
+        self.fc2 = nn.Linear(32, 32)
+        self.fc3 = nn.Linear(32, 1)
+    def forward(self, x):
+        x = torch.relu(self.fc1(x))
+        x = torch.relu(self.fc2(x))
+        return self.fc3(x)</code></pre>
+                </div>
+                <p><strong>Layers:</strong> 2 inputs → 32 hidden → 32 hidden → 1 output. The two ReLU activations allow the model to fit any nonlinear function (universal approximation).</p>
+                
+                <h3>Workflow</h3>
+                
+                <div class="workflow-step" data-step="1">
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">Load and normalize data</div>
+                        <div class="workflow-step-desc">Reads <code>simple_nonlinear.csv</code>, converts to PyTorch tensors, computes input statistics (mean/std).</div>
+                    </div>
+                </div>
+                
+                <div class="workflow-step" data-step="2">
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">Train the model</div>
+                        <div class="workflow-step-desc">Uses Adam optimizer, trains for 1000 epochs on the nonlinear data. Prints loss every 100 epochs.</div>
+                    </div>
+                </div>
+                
+                <div class="workflow-step" data-step="3">
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">Save normalization stats</div>
+                        <div class="workflow-step-desc">Stores mean and std to <code>norm_stats.npz</code>. Critical for inference—inputs must be normalized with the training stats.</div>
+                    </div>
+                </div>
+                
+                <div class="workflow-step" data-step="4">
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">Export to ONNX</div>
+                        <div class="workflow-step-desc">Calls <code>torch.onnx.export()</code> to produce <code>nonlinear_model.onnx</code>. Sets <code>model.eval()</code> first to disable training-specific behavior.</div>
+                    </div>
+                </div>
+                
+                <div class="workflow-step" data-step="5">
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">Verify ONNX matches PyTorch</div>
+                        <div class="workflow-step-desc">Runs inference on both and checks predictions match. If they differ, the export failed.</div>
+                    </div>
+                </div>
+                
+                <div class="workflow-step" data-step="6">
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">Generate Pi deployment script</div>
+                        <div class="workflow-step-desc">Writes <code>ml_onnx_minimal_for_pi.py</code>—a minimal Python script that runs ONNX inference on the Pi.</div>
+                    </div>
+                </div>
+                
+                <div class="workflow-step" data-step="7">
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">Deploy via SSH</div>
+                        <div class="workflow-step-desc">Uses <code>sshpass</code> to copy files to <code>pi@raspi.local:~/</code>. Requires <code>sshpass</code> installed and Pi SSH accessible.</div>
+                    </div>
+                </div>
+                
+                <h3>History feedback loop</h3>
+                <p>The file includes an example of feeding model predictions back as inputs:</p>
+                <pre><code>history = deque(maxlen=10)
+x1, x2 = 5.0, 5.0
+for step in range(20):
+    result = sess.run(None, {'input': x_norm})
+    pred = result[0][0][0]
+    history.append(pred)
+    x1 = pred
+    x2 = pred + step</code></pre>
+                <p>This demonstrates <strong>temporal dynamics</strong>—useful for signal reconstruction, where the model's output becomes the next input.</p>
+                
+                <h3>Output files</h3>
+                <table class="comparison-table">
+                    <tr>
+                        <th>File</th>
+                        <th>Purpose</th>
+                        <th>Size</th>
+                    </tr>
+                    <tr>
+                        <td><code>nonlinear_model.onnx</code></td>
+                        <td>Serialized model graph and weights</td>
+                        <td>~50–100 KB</td>
+                    </tr>
+                    <tr>
+                        <td><code>norm_stats.npz</code></td>
+                        <td>Input mean and std (required for inference)</td>
+                        <td>~100 bytes</td>
+                    </tr>
+                    <tr>
+                        <td><code>ml_onnx_minimal_for_pi.py</code></td>
+                        <td>Python script for Pi to load ONNX and run predictions</td>
+                        <td>~1 KB</td>
+                    </tr>
+                </table>
+                
+                <div class="tip">
+                    <strong>Requirement:</strong> Pi must have <code>onnxruntime</code> installed. Install with:<br/>
+                    <code>pip install onnxruntime</code> (or precompiled ARM wheels for faster install).
+                </div>
+            </section>
+            
+            <!-- FILE 3 -->
+            <section id="file3">
+                <h2>File 3: <code>3train_export_deploy_cpp.py</code> — Complete C/C++ Pipeline</h2>
+                
+                <p>The <strong>most complete file</strong>. Trains a nonlinear model and exports to <strong>native C and C++ inference code</strong>. Automatically deploys to Pi, compiles, and tests. This is the <span class="keyword">C/C++ deployment path</span>.</p>
+                
+                <h3>9-step pipeline</h3>
+                
+                <div class="workflow-step alt" data-step="1">
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">Load data and train model</div>
+                        <div class="workflow-step-desc">Same nonlinear architecture as File 2. Reads <code>simple_nonlinear.csv</code>, trains with Adam optimizer for 1000 epochs.</div>
+                    </div>
+                </div>
+                
+                <div class="workflow-step alt" data-step="2">
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">Save normalization stats</div>
+                        <div class="workflow-step-desc">Saves mean and std to <code>norm_stats.npz</code>. Same as File 2.</div>
+                    </div>
+                </div>
+                
+                <div class="workflow-step alt" data-step="3">
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">Export to ONNX (for verification)</div>
+                        <div class="workflow-step-desc">Creates ONNX to verify C/C++ results match PyTorch. This step is optional but recommended.</div>
+                    </div>
+                </div>
+                
+                <div class="workflow-step alt" data-step="4">
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">Extract weights to C header</div>
+                        <div class="workflow-step-desc">Generates <code>model_weights.h</code>. All weight matrices (W1, W2, W3) and biases (B1, B2, B3) are static float arrays. Also includes normalization constants (MEAN, STD).</div>
+                    </div>
+                </div>
+                
+                <div class="workflow-step alt" data-step="5">
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">Generate C++ inference file</div>
+                        <div class="workflow-step-desc">Creates <code>inference.cpp</code>. Implements <code>linear_relu()</code> and <code>linear()</code> functions for matrix-vector multiplication with activation functions. The <code>predict()</code> function normalizes inputs, runs through three layers, and returns output.</div>
+                    </div>
+                </div>
+                
+                <div class="workflow-step alt" data-step="6">
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">Generate C inference file</div>
+                        <div class="workflow-step-desc">Creates <code>inference.c</code>. Identical logic to C++ but in plain C (no classes, just functions). Uses <code>-lm</code> flag for math library.</div>
+                    </div>
+                </div>
+                
+                <div class="workflow-step alt" data-step="7">
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">Test locally</div>
+                        <div class="workflow-step-desc">Compiles C++ with <code>g++ -O2</code> and runs locally to verify it works before deploying to Pi.</div>
+                    </div>
+                </div>
+                
+                <div class="workflow-step alt" data-step="8">
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">Deploy files to Pi</div>
+                        <div class="workflow-step-desc">Uses <code>sshpass</code> to SCP all files (headers, source, stats) to <code>pi@raspi.local:~/</code>.</div>
+                    </div>
+                </div>
+                
+                <div class="workflow-step alt" data-step="9">
+                    <div class="workflow-step-content">
+                        <div class="workflow-step-title">Compile and test on Pi</div>
+                        <div class="workflow-step-desc">Generates a bash script, copies it to Pi, and executes it via SSH. Compiles both C and C++ versions and runs them. Prints predictions on the Pi itself—no data returned, just success/fail status.</div>
+                    </div>
+                </div>
+                
+                <h3>Generated C header: <code>model_weights.h</code></h3>
+                <p>Example structure (truncated for brevity):</p>
+                <pre><code>// Auto-generated model weights
+#pragma once
+
+static const float W1[2048] = { 0.1234f, -0.5678f, ... };
+static const float B1[32] = { 0.0012f, -0.0034f, ... };
+
+static const float W2[1024] = { ... };
+static const float B2[32] = { ... };
+
+static const float W3[32] = { ... };
+static const float B3[1] = { 0.4567f };
+
+static const float MEAN[2] = { 4.5f, 5.2f };
+static const float STD[2] = { 2.3f, 1.8f };</code></pre>
+                
+                <p>All weights are <strong>compile-time constants</strong>—they are baked into the binary at compile time, with zero runtime overhead.</p>
+                
+                <h3>Inference core: <code>linear_relu()</code> and <code>linear()</code></h3>
+                <pre><code>void linear_relu(const float* W, const float* B, const float* in,
+                 float* out, int M, int N) {
+    for (int j = 0; j < M; j++) {
+        float v = B[j];
+        for (int i = 0; i < N; i++)
+            v += W[j*N + i] * in[i];
+        out[j] = (v > 0.0f) ? v : 0.0f;  // ReLU
+    }
+}
+
+float predict(float x1, float x2) {
+    float x[2] = {
+        (x1 - MEAN[0]) / STD[0],
+        (x2 - MEAN[1]) / STD[1]
+    };
+    
+    float h1[32], h2[32], out[1];
+    linear_relu(W1, B1, x, h1, 32, 2);
+    linear_relu(W2, B2, h1, h2, 32, 32);
+    linear(W3, B3, h2, out, 1, 32);
+    
+    return out[0];
+}</code></pre>
+                
+                <p><strong>Performance:</strong> A single prediction takes ~1–2 microseconds on a Pi Zero (for this 2→32→32→1 model). No framework overhead.</p>
+                
+                <h3>Output files</h3>
+                <table class="comparison-table">
+                    <tr>
+                        <th>File</th>
+                        <th>Purpose</th>
+                        <th>Size</th>
+                    </tr>
+                    <tr>
+                        <td><code>model_weights.h</code></td>
+                        <td>Header with all weights as static arrays</td>
+                        <td>~40–80 KB</td>
+                    </tr>
+                    <tr>
+                        <td><code>inference.cpp</code></td>
+                        <td>C++ source with matrix math and activation functions</td>
+                        <td>~4 KB</td>
+                    </tr>
+                    <tr>
+                        <td><code>inference.c</code></td>
+                        <td>C equivalent of inference.cpp</td>
+                        <td>~4 KB</td>
+                    </tr>
+                    <tr>
+                        <td><code>inference_cpp</code></td>
+                        <td>Compiled executable (C++)</td>
+                        <td>~50 KB</td>
+                    </tr>
+                    <tr>
+                        <td><code>inference_c</code></td>
+                        <td>Compiled executable (C)</td>
+                        <td>~45 KB</td>
+                    </tr>
+                </table>
+                
+                <h3>Compilation commands on Pi</h3>
+                <pre><code># C++
+g++ -O2 -o inference_cpp inference.cpp
+./inference_cpp
+
+# C
+gcc -O2 -o inference_c inference.c -lm
+./inference_c</code></pre>
+                
+                <div class="tip">
+                    <strong>Tip:</strong> Add <code>-march=native</code> for additional speed (uses Pi-specific CPU features). For ESP32, use the appropriate ARM toolchain (e.g., <code>arm-none-eabi-gcc</code>).
+                </div>
+                
+                <div class="warning">
+                    <strong>SSH requirement:</strong> Auto-deployment needs <code>sshpass</code> and passwordless SSH access. For testing without SSH, comment out the deployment subprocess calls and compile locally instead.
+                </div>
+            </section>
+            
+            <!-- COMPARISON -->
+            <section id="comparison">
+                <h2>File Comparison: Scope and Features</h2>
+                
+                <table class="comparison-table">
+                    <tr>
+                        <th>Aspect</th>
+                        <th>File 1: Basic</th>
+                        <th>File 2: Python</th>
+                        <th>File 3: C/C++</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Model type</strong></td>
+                        <td>Linear (1 layer)</td>
+                        <td>Nonlinear (3 layers)</td>
+                        <td>Nonlinear (3 layers)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Training framework</strong></td>
+                        <td>PyTorch</td>
+                        <td>PyTorch</td>
+                        <td>PyTorch</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Export format</strong></td>
+                        <td>None (.pth only)</td>
+                        <td>ONNX + norm stats</td>
+                        <td>ONNX + C/C++ headers</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Deployment method</strong></td>
+                        <td>None</td>
+                        <td>Python script on Pi</td>
+                        <td>Compiled executable</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Target hardware</strong></td>
+                        <td>N/A</td>
+                        <td>Linux + Python</td>
+                        <td>Any (C/C++ compiler)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Inference runtime</strong></td>
+                        <td>N/A</td>
+                        <td>ONNX Runtime</td>
+                        <td>None (compiled-in)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Latency per prediction</strong></td>
+                        <td>N/A</td>
+                        <td>~0.1–1 ms</td>
+                        <td>~1–2 µs</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Binary size</strong></td>
+                        <td>N/A</td>
+                        <td>~50–100 KB (ONNX)</td>
+                        <td>~45–50 KB (executable)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Auto-deploy to Pi</strong></td>
+                        <td>No</td>
+                        <td>Yes (via sshpass)</td>
+                        <td>Yes (via sshpass)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>History feedback loop</strong></td>
+                        <td>No</td>
+                        <td>Yes</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Dependencies on target</strong></td>
+                        <td>N/A</td>
+                        <td>Python, onnxruntime, numpy</td>
+                        <td>None</td>
+                    </tr>
+                </table>
+            </section>
+            
+            <!-- DEPLOYMENT -->
+            <section id="deployment">
+                <h2>Deployment Guide</h2>
+                
+                <h3>Path A: Python ONNX (File 2)</h3>
+                
+                <div class="phase-box path-a">
+                    <strong>When to use:</strong> You need flexibility, easier debugging, or your target has Python available. The Pi, most Linux boards, and some microcontroller frameworks support Python.
+                </div>
+                
+                <h4>Prerequisites</h4>
+                <ul>
+                    <li>Raspberry Pi (or other SBC) with DietPi, Raspberry Pi OS, or equivalent</li>
+                    <li>SSH access: <code>ssh pi@raspi.local</code></li>
+                    <li><code>sshpass</code> installed on development machine (for auto-deployment)</li>
+                    <li>Python 3.8+ on Pi</li>
+                    <li><code>pip install onnxruntime numpy pandas</code> on Pi</li>
+                </ul>
+                
+                <h4>Deployment steps (automated in File 2)</h4>
+                <ol>
+                    <li><strong>Train model:</strong> Run File 2 on <code>ai.local</code>. Outputs: <code>nonlinear_model.onnx</code>, <code>norm_stats.npz</code>, <code>ml_onnx_minimal_for_pi.py</code>.</li>
+                    <li><strong>Copy to Pi:</strong> 
+                        <pre><code>sshpass -p pi scp nonlinear_model.onnx pi@raspi.local:~/
+sshpass -p pi scp norm_stats.npz pi@raspi.local:~/
+sshpass -p pi scp ml_onnx_minimal_for_pi.py pi@raspi.local:~/</code></pre>
+                    </li>
+                    <li><strong>Run inference on Pi:</strong>
+                        <pre><code>ssh pi@raspi.local
+cd ~
+python ml_onnx_minimal_for_pi.py</code></pre>
+                    </li>
+                </ol>
+                
+                <div class="tip">
+                    <strong>Tip:</strong> If onnxruntime is slow to install via pip, download precompiled ARM wheels from <a href="https://github.com/microsoft/onnxruntime/releases" target="_blank">onnxruntime releases</a>.
+                </div>
+                
+                <h4>Inference code on Pi (minimal)</h4>
+                <pre><code>import onnxruntime as ort
+import numpy as np
+
+sess = ort.InferenceSession('nonlinear_model.onnx')
+stats = np.load('norm_stats.npz')
+
+x_raw = np.array([[5.0, 5.0]], dtype=np.float32)
+x_norm = (x_raw - stats['mean']) / stats['std']
+
+result = sess.run(None, {'input': x_norm})
+print(f"Prediction: {result[0][0][0]:.4f}")</code></pre>
+                
+                <h3>Path B: Native C/C++ (File 3)</h3>
+                
+                <div class="phase-box path-b">
+                    <strong>When to use:</strong> You need minimal footprint, zero-framework deployment, fastest inference, or your target is a microcontroller without Python support (ESP32, ARM Cortex-M).
+                </div>
+                
+                <h4>Prerequisites</h4>
+                <ul>
+                    <li>Raspberry Pi with standard C/C++ build tools</li>
+                    <li>On Pi: <code>sudo apt-get install build-essential</code></li>
+                    <li><code>sshpass</code> on development machine</li>
+                    <li>No Python or external libraries required on target</li>
+                </ul>
+                
+                <h4>Deployment steps (automated in File 3)</h4>
+                <ol>
+                    <li><strong>Train model:</strong> Run File 3 on <code>ai.local</code>. Outputs all files including <code>model_weights.h</code>, <code>inference.cpp</code>, <code>inference.c</code>.</li>
+                    <li><strong>Copy to Pi:</strong>
+                        <pre><code>sshpass -p pi scp model_weights.h pi@raspi.local:~/
+sshpass -p pi scp inference.cpp pi@raspi.local:~/
+sshpass -p pi scp inference.c pi@raspi.local:~/</code></pre>
+                    </li>
+                    <li><strong>Compile on Pi:</strong>
+                        <pre><code>ssh pi@raspi.local
+g++ -O2 -o inference_cpp inference.cpp
+gcc -O2 -o inference_c inference.c -lm
+
+./inference_cpp
+./inference_c</code></pre>
+                    </li>
+                </ol>
+                
+                <h4>Using with ESP32 or other MCU</h4>
+                <p>The C code is platform-agnostic. To embed in an ESP32 or STM32:</p>
+                <ol>
+                    <li>Copy <code>model_weights.h</code> and <code>inference.c</code> to your MCU project</li>
+                    <li>Call <code>predict(x1, x2)</code> from your MCU firmware</li>
+                    <li>Compile with your MCU's toolchain (e.g., <code>arm-none-eabi-gcc</code> for ARM)</li>
+                </ol>
+                <pre><code>// In your ESP32 sketch or bare-metal code:
+#include "model_weights.h"
+#include "inference.c"
+
+float result = predict(5.0f, 5.0f);
+Serial.println(result);</code></pre>
+                
+                <div class="tip">
+                    <strong>Tip:</strong> For embedded systems with limited RAM, the static weight arrays are stored in Flash (program memory), not RAM. No dynamic allocation needed.
+                </div>
+                
+                <h3>Comparison: Deployment complexity</h3>
+                <p><strong>Path A (Python):</strong> More dependencies, slower install, slightly higher latency, easier to modify and debug post-deployment.</p>
+                <p><strong>Path B (C/C++):</strong> Compile once, no dependencies at runtime, minimal binary, microsecond latency, harder to modify on-device.</p>
+            </section>
+        </main>
+        
+        <footer>
+            <p>AI/ML embedded inference guide • PyTorch → ONNX / C++ deployment pipeline</p>
+            <p>For local GPU training: ai.local (RTX 3070 8GB) | Target deployment: Raspberry Pi, ESP32, ARM MCU</p>
+        </footer>
+    </div>
+    
+    <script>
+        function switchTab(tabName) {
+            event.preventDefault();
+            
+            // Hide all sections
+            const sections = document.querySelectorAll('section');
+            sections.forEach(s => s.classList.remove('active'));
+            
+            // Remove active class from all nav links
+            const navLinks = document.querySelectorAll('nav a');
+            navLinks.forEach(a => a.classList.remove('active'));
+            
+            // Show selected section
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked link
+            event.target.classList.add('active');
+            
+            // Scroll to top of main content
+            document.querySelector('main').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        // Initialize by showing overview
+        window.addEventListener('load', () => {
+            document.querySelector('nav a').classList.add('active');
+        });
+    </script>
+</body>
+</html>
